@@ -1,0 +1,91 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Email Tester</title>
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;background:#f6f7fb;margin:0;padding:24px}
+    .card{max-width:780px;margin:0 auto;background:#fff;padding:24px;border-radius:16px;box-shadow:0 6px 20px rgba(0,0,0,.06)}
+    h1{margin-top:0}
+    form{display:grid;gap:10px;grid-template-columns:1fr 1fr;align-items:end}
+    label{font-size:12px;text-transform:uppercase;color:#555;font-weight:700}
+    input,select{padding:10px;border:1px solid #ddd;border-radius:8px;width:100%}
+    button{padding:12px 16px;border:0;border-radius:10px;background:#0F62FE;color:#fff;font-weight:800;cursor:pointer}
+    .full{grid-column:1 / -1}
+    .muted{color:#666}
+    pre{background:#0b1020;color:#e6edf3;padding:12px;border-radius:8px;overflow:auto}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Email Tester</h1>
+    <p class="muted">Use this page to trigger Confirmation, Welcome, and Password Reset OTP emails.</p>
+    <form id="form">
+      <div class="full">
+        <label>Email</label>
+        <input id="email" type="email" placeholder="you@example.com" required>
+      </div>
+      <div>
+        <label>Action</label>
+        <select id="action">
+          <option value="signup">Send Confirmation</option>
+          <option value="request-reset">Send Reset OTP</option>
+        </select>
+      </div>
+      <div>
+        <label>OTP (for verify)</label>
+        <input id="otp" type="text" placeholder="123456">
+      </div>
+      <div class="full">
+        <button type="submit">Submit</button>
+      </div>
+    </form>
+
+    <h3>Verify OTP</h3>
+    <form id="verifyForm">
+      <div>
+        <label>Email</label>
+        <input id="vemail" type="email" placeholder="you@example.com" required>
+      </div>
+      <div>
+        <label>OTP</label>
+        <input id="votp" type="text" placeholder="123456" required>
+      </div>
+      <div>
+        <button type="submit">Verify</button>
+      </div>
+    </form>
+
+    <h3>Response</h3>
+    <pre id="out">{ }</pre>
+  </div>
+
+  <script>
+    const out = document.getElementById('out');
+    document.getElementById('form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const action = document.getElementById('action').value;
+      const res = await fetch('/auth/' + action, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      out.textContent = JSON.stringify(await res.json(), null, 2);
+    });
+
+    document.getElementById('verifyForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('vemail').value;
+      const otp = document.getElementById('votp').value;
+      const res = await fetch('/auth/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, otp })
+      });
+      out.textContent = JSON.stringify(await res.json(), null, 2);
+    });
+  </script>
+</body>
+</html>
