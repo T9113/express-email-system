@@ -10,6 +10,7 @@ import apiRoutes from './routes/api.js';
 import rootRoutes from './routes/root.js';
 import { generalRateLimit } from './middleware/rateLimiter.js';
 import { errorHandler, notFoundHandler } from './middleware/validation.js';
+import './utils/envCheck.js'; // Run environment check
 
 dotenv.config();
 
@@ -31,8 +32,10 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Logging middleware
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
-// Static files - serve test interface
-app.use('/test', express.static(path.join(__dirname, '..', 'public')));
+// Static file routes
+app.get('/test', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'test.html'));
+});
 
 // Routes
 app.use('/', rootRoutes);
