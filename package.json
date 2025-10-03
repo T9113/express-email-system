@@ -5,22 +5,41 @@
   "main": "src/index.js",
   "type": "module",
   "scripts": {
-    "start": "node src/index.js",
-    "dev": "nodemon src/index.js"
+    "start": "cross-env NODE_ENV=production node src/index.js",
+    "dev": "cross-env NODE_ENV=development nodemon src/index.js",
+    "test": "echo \"No tests specified yet\" && exit 0",
+    "lint": "echo \"No linting configured yet\" && exit 0",
+    "build": "echo \"No build step required for this project\" && exit 0"
   },
   "engines": {
     "node": ">=18"
   },
+  "keywords": [
+    "email",
+    "express",
+    "nodejs",
+    "smtp",
+    "authentication",
+    "otp",
+    "confirmation",
+    "welcome",
+    "password-reset"
+  ],
+  "author": "Tayyab",
+  "license": "MIT",
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "express-rate-limit": "^8.1.0",
+    "express-validator": "^7.2.1",
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
     "nodemailer": "^6.9.13"
   },
   "devDependencies": {
+    "cross-env": "^10.1.0",
     "nodemon": "^3.1.0"
   }
 }

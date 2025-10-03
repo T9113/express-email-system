@@ -6,6 +6,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { setOTP, verifyOTP } from '../utils/otpStore.js';
 import { markConfirmed, isConfirmed } from '../utils/tokenStore.js';
+import { emailRateLimit, otpRateLimit } from '../middleware/rateLimiter.js';
+import { validateEmail, validateOTP } from '../middleware/validation.js';
 
 const router = express.Router();
 const __filename = fileURLToPath(import.meta.url);
@@ -32,10 +34,9 @@ function fillCommon(html, email) {
 }
 
 // POST /auth/signup { email }
-router.post('/signup', async (req, res) => {
+router.post('/signup', emailRateLimit, validateEmail, async (req, res, next) => {
   try {
     const { email } = req.body;
-    if (!email) return res.status(400).json({ ok:false, error: 'Email is required' });
 
     // Create a JWT confirmation token
     const token = jwt.sign({ email }, process.env.JWT_SECRET || 'dev', { expiresIn: process.env.JWT_EXPIRES_IN || '1d' });
@@ -47,29 +48,38 @@ router.post('/signup', async (req, res) => {
 
     await sendMail({
       to: email,
-      subject: 'Confirm your email',
+      subject: `Confirm your email - ${BRAND_NAME}`,
       html
     });
 
-    return res.json({ ok:true, message:'Confirmation email sent', tokenPreview: token });
+    return res.json({ 
+      ok: true, 
+      message: 'Confirmation email sent successfully',
+      // Only include token preview in development
+      ...(process.env.NODE_ENV !== 'production' && { tokenPreview: token })
+    });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ ok:false, error: 'Failed to send confirmation email' });
+    next(err);
   }
 });
 
 // GET /auth/confirm?token=...
-router.get('/confirm', async (req, res) => {
+router.get('/confirm', async (req, res, next) => {
   try {
     const { token } = req.query;
-    if (!token) return res.status(400).json({ ok:false, error: 'Token is required' });
+    if (!token) return res.status(400).json({ ok: false, error: 'Token is required' });
 
     let email;
     try {
       const payload = jwt.verify(token, process.env.JWT_SECRET || 'dev');
       email = payload.email;
     } catch (e) {
-      return res.status(400).json({ ok:false, error: 'Invalid or expired token' });
+      return res.status(400).json({ ok: false, error: 'Invalid or expired token' });
+    }
+
+    // Check if already confirmed
+    if (isConfirmed(email)) {
+      return res.json({ ok: true, message: `${email} is already confirmed` });
     }
 
     // Mark confirmed (demo)
@@ -81,22 +91,20 @@ router.get('/confirm', async (req, res) => {
 
     await sendMail({
       to: email,
-      subject: 'Welcome to ' + BRAND_NAME,
+      subject: `Welcome to ${BRAND_NAME}! 🎉`,
       html
     });
 
-    return res.json({ ok:true, message:`${email} confirmed and welcome email sent` });
+    return res.json({ ok: true, message: `${email} confirmed successfully and welcome email sent` });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ ok:false, error: 'Failed to confirm user' });
+    next(err);
   }
 });
 
 // POST /auth/request-reset { email }
-router.post('/request-reset', async (req, res) => {
+router.post('/request-reset', emailRateLimit, validateEmail, async (req, res, next) => {
   try {
     const { email } = req.body;
-    if (!email) return res.status(400).json({ ok:false, error: 'Email is required' });
 
     // Generate a 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000);
@@ -108,31 +116,44 @@ router.post('/request-reset', async (req, res) => {
 
     await sendMail({
       to: email,
-      subject: 'Your password reset code',
+      subject: `Password Reset Code - ${BRAND_NAME}`,
       html
     });
 
-    return res.json({ ok:true, message:'OTP sent to email' });
+    return res.json({ ok: true, message: 'Password reset code sent to your email' });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ ok:false, error: 'Failed to send reset code' });
+    next(err);
   }
 });
 
 // POST /auth/verify-otp { email, otp }
-router.post('/verify-otp', (req, res) => {
+router.post('/verify-otp', otpRateLimit, validateOTP, (req, res) => {
   const { email, otp } = req.body;
-  if (!email || !otp) return res.status(400).json({ ok:false, error: 'Email and OTP are required' });
-
-  const ok = verifyOTP(email, otp);
-  return res.json({ ok, message: ok ? 'OTP verified' : 'Invalid or expired OTP' });
+  
+  const isValid = verifyOTP(email, otp);
+  
+  return res.json({ 
+    ok: isValid, 
+    message: isValid ? 'OTP verified successfully' : 'Invalid or expired OTP' 
+  });
 });
 
 // GET /auth/status?email=...
 router.get('/status', (req, res) => {
   const { email } = req.query;
-  if (!email) return res.status(400).json({ ok:false, error: 'Email is required' });
-  return res.json({ ok:true, confirmed: isConfirmed(email) });
+  if (!email) return res.status(400).json({ ok: false, error: 'Email is required' });
+  
+  // Simple email validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({ ok: false, error: 'Invalid email format' });
+  }
+  
+  return res.json({ 
+    ok: true, 
+    email: email.toLowerCase(),
+    confirmed: isConfirmed(email.toLowerCase()) 
+  });
 });
 
 export default router;

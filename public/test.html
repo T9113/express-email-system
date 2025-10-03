@@ -1,91 +1,310 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Email Tester</title>
+  <title>Email System Tester</title>
   <style>
-    body{font-family:Arial,Helvetica,sans-serif;background:#f6f7fb;margin:0;padding:24px}
-    .card{max-width:780px;margin:0 auto;background:#fff;padding:24px;border-radius:16px;box-shadow:0 6px 20px rgba(0,0,0,.06)}
-    h1{margin-top:0}
-    form{display:grid;gap:10px;grid-template-columns:1fr 1fr;align-items:end}
-    label{font-size:12px;text-transform:uppercase;color:#555;font-weight:700}
-    input,select{padding:10px;border:1px solid #ddd;border-radius:8px;width:100%}
-    button{padding:12px 16px;border:0;border-radius:10px;background:#0F62FE;color:#fff;font-weight:800;cursor:pointer}
-    .full{grid-column:1 / -1}
-    .muted{color:#666}
-    pre{background:#0b1020;color:#e6edf3;padding:12px;border-radius:8px;overflow:auto}
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh; 
+      padding: 20px; 
+    }
+    .container { 
+      max-width: 1000px; 
+      margin: 0 auto; 
+    }
+    .header {
+      text-align: center;
+      color: white;
+      margin-bottom: 30px;
+    }
+    .header h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+    .header p {
+      font-size: 1.1em;
+      opacity: 0.9;
+    }
+    .card { 
+      background: white; 
+      padding: 30px; 
+      border-radius: 15px; 
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 768px) {
+      .grid { grid-template-columns: 1fr; }
+      .header h1 { font-size: 2em; }
+    }
+    h2 { 
+      color: #333; 
+      margin-bottom: 20px; 
+      font-size: 1.5em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .form-group { 
+      margin-bottom: 20px; 
+    }
+    label { 
+      display: block;
+      font-size: 12px; 
+      text-transform: uppercase; 
+      color: #555; 
+      font-weight: 700; 
+      margin-bottom: 8px;
+    }
+    input, select, textarea { 
+      width: 100%;
+      padding: 12px; 
+      border: 2px solid #e1e5e9; 
+      border-radius: 8px; 
+      font-size: 14px;
+      transition: border-color 0.3s;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    button { 
+      width: 100%;
+      padding: 15px; 
+      border: none; 
+      border-radius: 8px; 
+      background: #667eea; 
+      color: white; 
+      font-weight: 700; 
+      font-size: 16px;
+      cursor: pointer; 
+      transition: background 0.3s;
+    }
+    button:hover { 
+      background: #5a67d8; 
+    }
+    button:disabled {
+      background: #a0aec0;
+      cursor: not-allowed;
+    }
+    .btn-secondary {
+      background: #48bb78;
+    }
+    .btn-secondary:hover {
+      background: #38a169;
+    }
+    pre { 
+      background: #2d3748; 
+      color: #e2e8f0; 
+      padding: 20px; 
+      border-radius: 8px; 
+      overflow: auto; 
+      font-size: 13px;
+      line-height: 1.5;
+      max-height: 400px;
+    }
+    .status-indicator {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+    .status-success { background: #48bb78; }
+    .status-error { background: #f56565; }
+    .status-pending { background: #ed8936; }
+    .quick-links {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .quick-link {
+      display: inline-block;
+      padding: 8px 16px;
+      background: #f7fafc;
+      color: #4a5568;
+      text-decoration: none;
+      border-radius: 6px;
+      font-size: 14px;
+      border: 1px solid #e2e8f0;
+      transition: all 0.3s;
+    }
+    .quick-link:hover {
+      background: #667eea;
+      color: white;
+      border-color: #667eea;
+    }
+    .loading {
+      opacity: 0.6;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>Email Tester</h1>
-    <p class="muted">Use this page to trigger Confirmation, Welcome, and Password Reset OTP emails.</p>
-    <form id="form">
-      <div class="full">
-        <label>Email</label>
-        <input id="email" type="email" placeholder="you@example.com" required>
-      </div>
-      <div>
-        <label>Action</label>
-        <select id="action">
-          <option value="signup">Send Confirmation</option>
-          <option value="request-reset">Send Reset OTP</option>
-        </select>
-      </div>
-      <div>
-        <label>OTP (for verify)</label>
-        <input id="otp" type="text" placeholder="123456">
-      </div>
-      <div class="full">
-        <button type="submit">Submit</button>
-      </div>
-    </form>
+  <div class="container">
+    <div class="header">
+      <h1>📧 Email System Tester</h1>
+      <p>Test confirmation, welcome, and password reset emails in real-time</p>
+    </div>
 
-    <h3>Verify OTP</h3>
-    <form id="verifyForm">
-      <div>
-        <label>Email</label>
-        <input id="vemail" type="email" placeholder="you@example.com" required>
+    <div class="card">
+      <div class="quick-links">
+        <a href="/" class="quick-link">🏠 Home</a>
+        <a href="/health" class="quick-link">🩺 Health</a>
+        <a href="/api/v1/status" class="quick-link">📊 API Status</a>
+        <a href="/api/v1/docs" class="quick-link">📖 Documentation</a>
       </div>
-      <div>
-        <label>OTP</label>
-        <input id="votp" type="text" placeholder="123456" required>
-      </div>
-      <div>
-        <button type="submit">Verify</button>
-      </div>
-    </form>
+    </div>
 
-    <h3>Response</h3>
-    <pre id="out">{ }</pre>
+    <div class="grid">
+      <div class="card">
+        <h2>📤 Send Email</h2>
+        <form id="emailForm">
+          <div class="form-group">
+            <label>Email Address</label>
+            <input id="email" type="email" placeholder="user@example.com" required>
+          </div>
+          <div class="form-group">
+            <label>Email Type</label>
+            <select id="action">
+              <option value="signup">📧 Confirmation Email</option>
+              <option value="request-reset">🔐 Password Reset OTP</option>
+            </select>
+          </div>
+          <button type="submit" id="sendBtn">Send Email</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>🔐 Verify OTP</h2>
+        <form id="verifyForm">
+          <div class="form-group">
+            <label>Email Address</label>
+            <input id="vemail" type="email" placeholder="user@example.com" required>
+          </div>
+          <div class="form-group">
+            <label>OTP Code</label>
+            <input id="votp" type="text" placeholder="123456" pattern="[0-9]{6}" maxlength="6" required>
+          </div>
+          <button type="submit" id="verifyBtn" class="btn-secondary">Verify OTP</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>
+        <span class="status-indicator status-pending" id="statusIndicator"></span>
+        Response
+      </h2>
+      <pre id="output">{ "message": "Click any button above to test the email system" }</pre>
+    </div>
+
+    <div class="card">
+      <h2>📝 Test Instructions</h2>
+      <ol style="line-height: 1.8; color: #4a5568;">
+        <li><strong>Confirmation Flow:</strong> Enter your email → Click "Send Email" → Check your inbox → Click the confirmation link</li>
+        <li><strong>Reset Flow:</strong> Select "Password Reset OTP" → Enter email → Check your inbox for 6-digit code → Enter code in "Verify OTP" section</li>
+        <li><strong>Status Check:</strong> Use the API endpoint <code>/auth/status?email=youremail@domain.com</code> to check confirmation status</li>
+        <li><strong>Rate Limits:</strong> 5 emails per 15 minutes, 10 OTP verifications per 15 minutes per IP</li>
+      </ol>
+    </div>
   </div>
 
   <script>
-    const out = document.getElementById('out');
-    document.getElementById('form').addEventListener('submit', async (e) => {
+    const output = document.getElementById('output');
+    const statusIndicator = document.getElementById('statusIndicator');
+    const sendBtn = document.getElementById('sendBtn');
+    const verifyBtn = document.getElementById('verifyBtn');
+
+    function updateStatus(type) {
+      statusIndicator.className = `status-indicator status-${type}`;
+    }
+
+    function setLoading(button, loading) {
+      if (loading) {
+        button.disabled = true;
+        button.textContent = button.textContent.replace(/^/, '⏳ ');
+        document.body.classList.add('loading');
+      } else {
+        button.disabled = false;
+        button.textContent = button.textContent.replace('⏳ ', '');
+        document.body.classList.remove('loading');
+      }
+    }
+
+    async function makeRequest(url, options = {}) {
+      try {
+        updateStatus('pending');
+        const response = await fetch(url, {
+          headers: { 'Content-Type': 'application/json' },
+          ...options
+        });
+        const data = await response.json();
+        
+        output.textContent = JSON.stringify(data, null, 2);
+        updateStatus(data.ok ? 'success' : 'error');
+        
+        return data;
+      } catch (error) {
+        const errorData = {
+          ok: false,
+          error: 'Network error',
+          message: error.message,
+          timestamp: new Date().toISOString()
+        };
+        output.textContent = JSON.stringify(errorData, null, 2);
+        updateStatus('error');
+        return errorData;
+      }
+    }
+
+    document.getElementById('emailForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+      setLoading(sendBtn, true);
+      
       const email = document.getElementById('email').value;
       const action = document.getElementById('action').value;
-      const res = await fetch('/auth/' + action, {
+      
+      await makeRequest('/auth/' + action, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })
       });
-      out.textContent = JSON.stringify(await res.json(), null, 2);
+      
+      setLoading(sendBtn, false);
     });
 
     document.getElementById('verifyForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+      setLoading(verifyBtn, true);
+      
       const email = document.getElementById('vemail').value;
       const otp = document.getElementById('votp').value;
-      const res = await fetch('/auth/verify-otp', {
+      
+      await makeRequest('/auth/verify-otp', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, otp })
       });
-      out.textContent = JSON.stringify(await res.json(), null, 2);
+      
+      setLoading(verifyBtn, false);
     });
+
+    // Auto-format OTP input
+    document.getElementById('votp').addEventListener('input', (e) => {
+      e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6);
+    });
+
+    // Initialize status
+    updateStatus('pending');
   </script>
 </body>
 </html>
