@@ -3,177 +3,96 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Email System Tester</title>
+  <title>Email Tester</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
     body { 
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh; 
-      padding: 20px; 
-    }
-    .container { 
-      max-width: 1000px; 
-      margin: 0 auto; 
-    }
-    .header {
-      text-align: center;
-      color: white;
-      margin-bottom: 30px;
-    }
-    .header h1 {
-      font-size: 2.5em;
-      margin-bottom: 10px;
-      font-weight: 700;
-    }
-    .header p {
-      font-size: 1.1em;
-      opacity: 0.9;
+      font-family: Arial, sans-serif; 
+      max-width: 800px; 
+      margin: 40px auto; 
+      padding: 20px;
+      background: #f5f7fa;
     }
     .card { 
       background: white; 
       padding: 30px; 
-      border-radius: 15px; 
-      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      border-radius: 10px; 
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
       margin-bottom: 20px;
     }
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-    }
-    @media (max-width: 768px) {
-      .grid { grid-template-columns: 1fr; }
-      .header h1 { font-size: 2em; }
-    }
-    h2 { 
-      color: #333; 
-      margin-bottom: 20px; 
-      font-size: 1.5em;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .form-group { 
-      margin-bottom: 20px; 
-    }
+    h1 { color: #333; margin-top: 0; }
+    h2 { color: #555; margin-bottom: 15px; }
+    .form-group { margin-bottom: 15px; }
     label { 
-      display: block;
-      font-size: 12px; 
-      text-transform: uppercase; 
-      color: #555; 
-      font-weight: 700; 
-      margin-bottom: 8px;
+      display: block; 
+      margin-bottom: 5px; 
+      font-weight: bold; 
+      color: #555;
     }
-    input, select, textarea { 
-      width: 100%;
-      padding: 12px; 
-      border: 2px solid #e1e5e9; 
-      border-radius: 8px; 
+    input, select { 
+      width: 100%; 
+      padding: 10px; 
+      border: 1px solid #ddd; 
+      border-radius: 5px; 
       font-size: 14px;
-      transition: border-color 0.3s;
-    }
-    input:focus, select:focus, textarea:focus {
-      outline: none;
-      border-color: #667eea;
     }
     button { 
-      width: 100%;
-      padding: 15px; 
-      border: none; 
-      border-radius: 8px; 
-      background: #667eea; 
+      background: #007bff; 
       color: white; 
-      font-weight: 700; 
-      font-size: 16px;
-      cursor: pointer; 
-      transition: background 0.3s;
+      padding: 12px 20px; 
+      border: none; 
+      border-radius: 5px; 
+      cursor: pointer;
+      font-size: 14px;
+      width: 100%;
     }
-    button:hover { 
-      background: #5a67d8; 
-    }
-    button:disabled {
-      background: #a0aec0;
-      cursor: not-allowed;
-    }
-    .btn-secondary {
-      background: #48bb78;
-    }
-    .btn-secondary:hover {
-      background: #38a169;
-    }
+    button:hover { background: #0056b3; }
+    button:disabled { background: #ccc; cursor: not-allowed; }
+    .success { color: #28a745; font-weight: bold; }
+    .error { color: #dc3545; font-weight: bold; }
     pre { 
       background: #2d3748; 
       color: #e2e8f0; 
-      padding: 20px; 
-      border-radius: 8px; 
-      overflow: auto; 
-      font-size: 13px;
-      line-height: 1.5;
-      max-height: 400px;
+      padding: 15px; 
+      border-radius: 5px; 
+      overflow: auto;
+      font-size: 12px;
     }
-    .status-indicator {
-      display: inline-block;
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      margin-right: 8px;
+    .grid { 
+      display: grid; 
+      grid-template-columns: 1fr 1fr; 
+      gap: 20px; 
     }
-    .status-success { background: #48bb78; }
-    .status-error { background: #f56565; }
-    .status-pending { background: #ed8936; }
-    .quick-links {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
+    @media (max-width: 768px) {
+      .grid { grid-template-columns: 1fr; }
     }
-    .quick-link {
-      display: inline-block;
-      padding: 8px 16px;
-      background: #f7fafc;
-      color: #4a5568;
-      text-decoration: none;
-      border-radius: 6px;
-      font-size: 14px;
-      border: 1px solid #e2e8f0;
-      transition: all 0.3s;
+    .status { 
+      padding: 10px; 
+      border-radius: 5px; 
+      margin-bottom: 15px;
+      display: none;
     }
-    .quick-link:hover {
-      background: #667eea;
-      color: white;
-      border-color: #667eea;
-    }
-    .loading {
-      opacity: 0.6;
-      pointer-events: none;
-    }
+    .status.show { display: block; }
+    .status.success { background: #d4edda; border: 1px solid #c3e6cb; }
+    .status.error { background: #f8d7da; border: 1px solid #f5c6cb; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <h1>📧 Email System Tester</h1>
-      <p>Test confirmation, welcome, and password reset emails in real-time</p>
-    </div>
-
-    <div class="card">
-      <div class="quick-links">
-        <a href="/" class="quick-link">🏠 Home</a>
-        <a href="/health" class="quick-link">🩺 Health</a>
-        <a href="/api/v1/status" class="quick-link">📊 API Status</a>
-        <a href="/api/v1/docs" class="quick-link">📖 Documentation</a>
-      </div>
-    </div>
-
+  <div class="card">
+    <h1>📧 Email System Tester</h1>
+    <p>Test your email system with real email sending</p>
+    
+    <div class="status" id="status"></div>
+    
     <div class="grid">
-      <div class="card">
+      <div>
         <h2>📤 Send Email</h2>
         <form id="emailForm">
           <div class="form-group">
-            <label>Email Address</label>
-            <input id="email" type="email" placeholder="user@example.com" required>
+            <label>Your Email Address</label>
+            <input id="email" type="email" placeholder="your@email.com" required>
+            <small>Enter your real email to test</small>
           </div>
+          
           <div class="form-group">
             <label>Email Type</label>
             <select id="action">
@@ -181,89 +100,101 @@
               <option value="request-reset">🔐 Password Reset OTP</option>
             </select>
           </div>
+          
           <button type="submit" id="sendBtn">Send Email</button>
         </form>
       </div>
 
-      <div class="card">
+      <div>
         <h2>🔐 Verify OTP</h2>
         <form id="verifyForm">
           <div class="form-group">
             <label>Email Address</label>
-            <input id="vemail" type="email" placeholder="user@example.com" required>
+            <input id="vemail" type="email" placeholder="your@email.com" required>
           </div>
+          
           <div class="form-group">
-            <label>OTP Code</label>
+            <label>OTP Code (6 digits)</label>
             <input id="votp" type="text" placeholder="123456" pattern="[0-9]{6}" maxlength="6" required>
+            <small>Check your email for the 6-digit code</small>
           </div>
-          <button type="submit" id="verifyBtn" class="btn-secondary">Verify OTP</button>
+          
+          <button type="submit" id="verifyBtn">Verify OTP</button>
         </form>
       </div>
     </div>
+  </div>
 
-    <div class="card">
-      <h2>
-        <span class="status-indicator status-pending" id="statusIndicator"></span>
-        Response
-      </h2>
-      <pre id="output">{ "message": "Click any button above to test the email system" }</pre>
-    </div>
+  <div class="card">
+    <h2>📋 Response</h2>
+    <pre id="output">Click any button above to test the email system</pre>
+  </div>
 
-    <div class="card">
-      <h2>📝 Test Instructions</h2>
-      <ol style="line-height: 1.8; color: #4a5568;">
-        <li><strong>Confirmation Flow:</strong> Enter your email → Click "Send Email" → Check your inbox → Click the confirmation link</li>
-        <li><strong>Reset Flow:</strong> Select "Password Reset OTP" → Enter email → Check your inbox for 6-digit code → Enter code in "Verify OTP" section</li>
-        <li><strong>Status Check:</strong> Use the API endpoint <code>/auth/status?email=youremail@domain.com</code> to check confirmation status</li>
-        <li><strong>Rate Limits:</strong> 5 emails per 15 minutes, 10 OTP verifications per 15 minutes per IP</li>
-      </ol>
-    </div>
+  <div class="card">
+    <h2>📝 How to Test</h2>
+    <ol>
+      <li><strong>Enter your real email address</strong> - You need to check your actual inbox</li>
+      <li><strong>Click "Send Email"</strong> - Check the response and your email inbox</li>
+      <li><strong>For confirmation:</strong> Click the link in the email you receive</li>
+      <li><strong>For OTP:</strong> Copy the 6-digit code from your email and paste it above</li>
+      <li><strong>Check spam folder</strong> if you don't see the email</li>
+    </ol>
+    
+    <p><strong>🔍 Troubleshooting:</strong></p>
+    <ul>
+      <li>Check your spam/junk folder</li>
+      <li>Make sure SMTP settings are correct</li>
+      <li>Look at browser console for errors</li>
+      <li>Check server logs for email sending status</li>
+    </ul>
   </div>
 
   <script>
     const output = document.getElementById('output');
-    const statusIndicator = document.getElementById('statusIndicator');
+    const status = document.getElementById('status');
     const sendBtn = document.getElementById('sendBtn');
     const verifyBtn = document.getElementById('verifyBtn');
 
-    function updateStatus(type) {
-      statusIndicator.className = `status-indicator status-${type}`;
+    function showStatus(message, type) {
+      status.textContent = message;
+      status.className = `status ${type} show`;
+      setTimeout(() => status.classList.remove('show'), 5000);
     }
 
     function setLoading(button, loading) {
+      button.disabled = loading;
       if (loading) {
-        button.disabled = true;
-        button.textContent = button.textContent.replace(/^/, '⏳ ');
-        document.body.classList.add('loading');
+        button.textContent = button.textContent.includes('Send') ? '📤 Sending...' : '🔍 Verifying...';
       } else {
-        button.disabled = false;
-        button.textContent = button.textContent.replace('⏳ ', '');
-        document.body.classList.remove('loading');
+        button.textContent = button.textContent.includes('Send') ? 'Send Email' : 'Verify OTP';
       }
     }
 
     async function makeRequest(url, options = {}) {
       try {
-        updateStatus('pending');
         const response = await fetch(url, {
           headers: { 'Content-Type': 'application/json' },
           ...options
         });
-        const data = await response.json();
         
+        const data = await response.json();
         output.textContent = JSON.stringify(data, null, 2);
-        updateStatus(data.ok ? 'success' : 'error');
+        
+        if (data.ok) {
+          showStatus(data.message || 'Success!', 'success');
+        } else {
+          showStatus(data.error || 'Something went wrong', 'error');
+        }
         
         return data;
       } catch (error) {
         const errorData = {
           ok: false,
           error: 'Network error',
-          message: error.message,
-          timestamp: new Date().toISOString()
+          message: error.message
         };
         output.textContent = JSON.stringify(errorData, null, 2);
-        updateStatus('error');
+        showStatus('Network error - check your connection', 'error');
         return errorData;
       }
     }
@@ -275,10 +206,15 @@
       const email = document.getElementById('email').value;
       const action = document.getElementById('action').value;
       
-      await makeRequest('/auth/' + action, {
+      const result = await makeRequest('/auth/' + action, {
         method: 'POST',
         body: JSON.stringify({ email })
       });
+      
+      // Auto-fill verify form with the same email
+      if (result.ok) {
+        document.getElementById('vemail').value = email;
+      }
       
       setLoading(sendBtn, false);
     });
@@ -302,9 +238,6 @@
     document.getElementById('votp').addEventListener('input', (e) => {
       e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6);
     });
-
-    // Initialize status
-    updateStatus('pending');
   </script>
 </body>
 </html>
